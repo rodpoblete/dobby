@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="dobby-logo.png" alt="Dobby Logo" width="300"/>
+  <img src="dobby-logo-v3.png" alt="Dobby Logo" width="300"/>
 
   # Dobby - Transformador de Datos de Matrícula Estudiantil
 
