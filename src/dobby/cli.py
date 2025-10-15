@@ -323,9 +323,28 @@ def main(
     show_interactive_menu()
 
 
+def show_dobby_header():
+    """Display Dobby ASCII art header."""
+    dobby_art = """[bold cyan]
+       /$$           /$$       /$$
+      | $$          | $$      | $$
+  /$$$$$$$  /$$$$$$ | $$$$$$$ | $$$$$$$  /$$   /$$
+ /$$__  $$ /$$__  $$| $$__  $$| $$__  $$| $$  | $$
+| $$  | $$| $$  \\ $$| $$  \\ $$| $$  \\ $$| $$  | $$
+| $$  | $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$
+|  $$$$$$$|  $$$$$$/| $$$$$$$/| $$$$$$$/|  $$$$$$$
+ \\_______/ \\______/ |_______/ |_______/  \\____  $$
+                                         /$$  | $$
+                                        |  $$$$$$/
+                                         \\______/ [/bold cyan]
+"""
+    console.print(dobby_art)
+
+
 def show_interactive_menu():
     """Show interactive menu for user to select action."""
-    console.print("\n[bold cyan]Dobby - Transformador de Datos de Matrícula[/bold cyan]\n")
+    show_dobby_header()
+    console.print("[bold cyan]Estoy aquí para ayudar con los datos, señor[/bold cyan]\n")
 
     while True:
         action = questionary.select(
