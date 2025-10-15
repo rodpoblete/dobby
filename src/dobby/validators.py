@@ -91,7 +91,12 @@ def validate_email(email: str) -> bool:
 
 def validate_phone(phone: Any) -> bool:
     """
-    Validate Chilean phone number.
+    Validate Chilean phone number (mobile or fixed).
+
+    Accepts:
+    - Mobile: 9 digits starting with 9 (e.g., 987654321)
+    - Fixed: 9 digits starting with 2-7 (e.g., 223456789, 512345678)
+    - Empty: 0 or None
 
     Args:
         phone: Phone number (can be int or string)
@@ -102,10 +107,20 @@ def validate_phone(phone: Any) -> bool:
     if phone is None or phone == 0:
         return True  # Allow empty phones
 
-    phone_str = str(phone)
+    phone_str = str(phone).strip()
 
-    # Chilean mobile phones: 9 digits starting with 9
-    return bool(re.match(r"^9\d{8}$", phone_str))
+    # Remove common separators
+    phone_str = phone_str.replace(" ", "").replace("-", "").replace("+56", "")
+
+    # Must be exactly 9 digits
+    if not re.match(r"^\d{9}$", phone_str):
+        return False
+
+    phone_int = int(phone_str)
+
+    # Mobile: starts with 9 (900000000-999999999)
+    # Fixed: starts with 2-7 (200000000-799999999)
+    return (900000000 <= phone_int <= 999999999) or (200000000 <= phone_int <= 799999999)
 
 
 def clean_address(address: str) -> str:

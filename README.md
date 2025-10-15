@@ -57,7 +57,27 @@ dobby transform data/alumnos_ser.csv
 
 ## Uso
 
-### Comando Transform
+### Menú Interactivo
+
+Dobby ahora incluye un menú interactivo que te guía paso a paso a través de las operaciones. Para acceder al menú interactivo, simplemente ejecuta:
+
+```bash
+uv run dobby
+```
+
+O si está instalado globalmente:
+
+```bash
+dobby
+```
+
+El menú interactivo te permite:
+- 🔄 **Transformar archivo CSV** - Te guía a través de todas las opciones de transformación
+- ✅ **Validar archivo CSV** - Valida tu archivo sin procesarlo
+- ℹ️ **Ver información y ayuda** - Muestra información detallada sobre la herramienta
+- 🚪 **Salir** - Sale del programa
+
+### Comando Transform (Línea de comandos)
 
 Transforma un CSV de matrícula estudiantil desde formato fuente al formato del sistema SN.
 
@@ -95,7 +115,7 @@ dobby transform input.csv -v
 dobby transform input.csv --skip-validation
 ```
 
-### Comando Validate
+### Comando Validate (Línea de comandos)
 
 Valida el CSV de entrada sin realizar la transformación.
 
@@ -137,19 +157,40 @@ YYYY-MM-DD-HHMM-alumnos-upload-sn.csv
 
 Ejemplo: `data/2025-10-14-1700-alumnos-upload-sn.csv`
 
-## Validación de RUT
+## Validación de Datos
+
+### Validación de RUT
 
 La herramienta soporta dos tipos de identificadores:
 
-### RUT Regular
+**RUT Regular:**
 - Formato: XXXXXXXX-Y donde Y es el dígito verificador (0-9 o K)
 - Valida el dígito verificador usando el algoritmo estándar chileno
 
-### IPE (Identificador Provisorio del Estudiante)
+**IPE (Identificador Provisorio del Estudiante):**
 - Para estudiantes extranjeros sin cédula de identidad definitiva
 - Rangos: 100,000,000-199,999,999 o 200,000,000-299,999,999
 - El dígito verificador NO se valida (se acepta tal cual)
 - Ejemplos: 100123456-0, 200987654-K
+
+### Validación de Teléfonos
+
+La herramienta valida números telefónicos chilenos en ambos formatos:
+
+**Teléfonos Móviles:**
+- 9 dígitos empezando con 9
+- Rango: 900,000,000 - 999,999,999
+- Ejemplo: 987654321
+
+**Teléfonos Fijos:**
+- 9 dígitos empezando con código de área (2-7)
+- Santiago (2): 223456789
+- Regiones (3-7): 512345678, 322345678, etc.
+- Rango: 200,000,000 - 799,999,999
+
+**Valores especiales:**
+- `0` indica teléfono vacío o no disponible
+- Números inválidos se convierten a `0` con advertencia en el log
 
 ## Desarrollo
 

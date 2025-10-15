@@ -18,6 +18,19 @@ uv sync --no-dev
 ```
 
 ### Running the Application
+
+**Interactive Menu (Recommended for new users):**
+```bash
+# Launch interactive menu
+uv run dobby
+
+# The menu provides guided workflows for:
+# - Transform CSV with step-by-step prompts
+# - Validate CSV with simple prompts
+# - View help and information
+```
+
+**Command-line (Direct commands for automation/scripts):**
 ```bash
 # Transform CSV with default settings
 uv run dobby transform data/alumnos_ser.csv
@@ -114,9 +127,14 @@ Each step modifies `self.df` in place. The pipeline is sequential and order-depe
 - `OUTPUT_COLUMNS` - Ordered list of 29 output columns
 
 **src/dobby/cli.py** - Typer-based CLI interface
+- `main` callback - Interactive menu using questionary (default when no command specified)
 - `transform` command - Main transformation with rich progress/table output
 - `validate` command - Validation-only mode without file output
-- Uses Rich library for colorful terminal output
+- `show_interactive_menu()` - Main menu loop with 4 options
+- `interactive_transform()` - Guided transformation workflow
+- `interactive_validate()` - Guided validation workflow
+- `show_help()` - Displays comprehensive help information
+- Uses Rich library for colorful terminal output and questionary for interactive prompts
 
 **src/dobby/exceptions.py** - Custom exception hierarchy
 - `DobbyError` - Base exception
@@ -143,11 +161,13 @@ CSV Output (UTF-8-sig, semicolon-separated)
 - CLI displays validation warnings in table format
 - Logs written to `logs/dobby.log` with rotation
 
-### Chilean RUT Validation
+### Data Validation
+
+**Chilean RUT Validation:**
 
 Supports two types of identifiers:
 
-**Regular RUT:** XXXXXXXX-Y where Y is check digit (0-9 or K)
+*Regular RUT:* XXXXXXXX-Y where Y is check digit (0-9 or K)
 
 Algorithm:
 1. Multiply each digit by weights 2,3,4,5,6,7,2,3... (right to left)
@@ -155,11 +175,30 @@ Algorithm:
 3. Calculate: 11 - (sum % 11)
 4. Special cases: 11→0, 10→K
 
-**IPE (Identificador Provisorio del Estudiante):** RUTs starting with 100 or 200 million
+*IPE (Identificador Provisorio del Estudiante):* RUTs starting with 100 or 200 million
 - Used for foreign students without definitive Chilean ID
 - RUTs in ranges: 100,000,000-199,999,999 or 200,000,000-299,999,999
 - Check digit is NOT validated (accepted as-is)
 - Example: 100123456-0, 200987654-K
+
+**Phone Number Validation:**
+
+Accepts both Chilean mobile and fixed-line phones:
+
+*Mobile phones:*
+- 9 digits starting with 9
+- Range: 900,000,000 - 999,999,999
+- Example: 987654321
+
+*Fixed-line phones:*
+- 9 digits starting with area code (2-7)
+- Santiago (2): 223456789
+- Regions (3-7): 512345678, 322345678, etc.
+- Range: 200,000,000 - 799,999,999
+
+*Special values:*
+- `0` = empty/unavailable phone
+- Invalid phones → converted to `0` with warning logged
 
 ## Configuration
 

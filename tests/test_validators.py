@@ -78,17 +78,42 @@ class TestEmailValidation:
 class TestPhoneValidation:
     """Tests for phone validation."""
 
-    def test_valid_phone(self):
-        """Test valid phone numbers."""
+    def test_valid_mobile_phone(self):
+        """Test valid mobile phone numbers."""
         assert validate_phone(987654321) is True
         assert validate_phone("987654321") is True
+        assert validate_phone(912345678) is True
+        assert validate_phone(999999999) is True
+
+    def test_valid_fixed_phone(self):
+        """Test valid fixed phone numbers."""
+        # Santiago (2)
+        assert validate_phone(223456789) is True
+        assert validate_phone("227058300") is True
+        # La Serena (51)
+        assert validate_phone(512345678) is True
+        assert validate_phone("512626912") is True
+        # Other regions (3-7)
+        assert validate_phone(322345678) is True
+        assert validate_phone(412345678) is True
+        assert validate_phone(722345678) is True
+
+    def test_valid_empty_phone(self):
+        """Test valid empty phone values."""
         assert validate_phone(0) is True
         assert validate_phone(None) is True
 
     def test_invalid_phone(self):
         """Test invalid phone numbers."""
+        # Starts with 1
         assert validate_phone(123456789) is False
-        assert validate_phone("87654321") is False
+        # Starts with 8
+        assert validate_phone(812345678) is False
+        # Too few digits
+        assert validate_phone(87654321) is False
+        assert validate_phone("96898722") is False
+        # Too many digits
+        assert validate_phone(9876543210) is False
 
 
 class TestAddressCleaning:

@@ -211,8 +211,62 @@ class StudentDataTransformer:
         phone_columns = ["Celular Apoderado", "Celular SPL"]
         for col in phone_columns:
             if col in self.df.columns:
-                self.df[col] = self.df[col].fillna(0)
-                self.df[col] = self.df[col].astype("int64")
+                # Validate and clean phone numbers
+                for idx, phone in self.df[col].items():
+                    # Handle NaN/None/empty
+                    if pd.isna(phone) or phone == "" or phone is None:
+                        self.df.at[idx, col] = 0
+                        continue
+
+                    # Convert to string
+                    phone_str = str(phone).strip()
+
+                    # Handle float notation (e.g., "932832346.0" -> "932832346")
+                    if "." in phone_str:
+                        try:
+                            # Convert to float then to int to remove decimal part
+                            phone_str = str(int(float(phone_str)))
+                        except (ValueError, OverflowError):
+                            pass
+
+                    # Remove spaces, hyphens, and other common separators
+                    phone_str = phone_str.replace(" ", "").replace("-", "").replace("+56", "")
+
+                    # Remove non-digit characters
+                    phone_str = "".join(c for c in phone_str if c.isdigit())
+
+                    # If empty after cleaning, set to 0
+                    if not phone_str:
+                        self.df.at[idx, col] = 0
+                        continue
+
+                    # Convert to integer
+                    phone_int = int(phone_str)
+
+                    # Validate: 0 is valid (empty phone)
+                    if phone_int == 0:
+                        self.df.at[idx, col] = 0
+                        continue
+
+                    # Validate Chilean phone format (9 digits)
+                    # Mobile: starts with 9 (900000000-999999999)
+                    # Fixed: starts with 2,3,4,5,6,7 (200000000-799999999)
+                    is_mobile = 900000000 <= phone_int <= 999999999
+                    is_fixed = 200000000 <= phone_int <= 799999999
+
+                    if is_mobile or is_fixed:
+                        self.df.at[idx, col] = phone_int
+                    else:
+                        # Invalid phone (wrong format)
+                        # Log warning and set to 0 to maintain data integrity
+                        logger.warning(f"Row {idx}: Invalid phone in {col}: {phone} (cleaned: {phone_int}) -> setting to 0")
+                        self.errors.append({
+                            "row": idx,
+                            "field": col,
+                            "value": phone,
+                            "error": f"Invalid phone: must be 9 digits (mobile 9XX... or fixed 2-7XX...)"
+                        })
+                        self.df.at[idx, col] = 0
 
     def add_metadata_columns(self) -> None:
         """Add RBD, year, nivel, and local columns."""
@@ -269,6 +323,8 @@ class StudentDataTransformer:
 
         logger.debug("Validating email addresses")
 
+        # Count email errors separately to report accurately
+        email_error_count = 0
         email_columns = ["estudianteEmail", "tutor1Email", "tutor2Email"]
         for col in email_columns:
             if col in self.df.columns:
@@ -280,9 +336,10 @@ class StudentDataTransformer:
                             "value": email,
                             "error": "Invalid email format"
                         })
+                        email_error_count += 1
 
-        if self.errors:
-            logger.warning(f"Found {len(self.errors)} email validation errors")
+        if email_error_count > 0:
+            logger.warning(f"Found {email_error_count} email validation errors")
 
     def transform(self, input_path: Path) -> pd.DataFrame:
         """
